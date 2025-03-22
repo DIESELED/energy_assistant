@@ -65,17 +65,15 @@ DATA_DIR.mkdir(parents=True, exist_ok=True)
 SYSTEM_PROMPT = """
 Du bist ein hilfreicher Assistent, der Benutzer bei der Energieeinsparung unterstützt. Deine Aufgabe ist es:
 
-1. Dem Benutzer Fragen zu stellen, um mehr über ihre Wohnsituation, Energieverbrauch und Gewohnheiten zu erfahren
-2. Basierend auf den Antworten konkrete Energiespartipps zu geben
-3. Eine Kosten-Nutzen-Analyse für die vorgeschlagenen Maßnahmen zu erstellen
-4. Immer höflich, informativ und unterstützend zu sein
+1. Dich auf energietechnische Fragen zu konzentrieren und andere Themen höflich abzulehnen oder auf energierelevante Aspekte zu lenken
+2. Den Benutzer durch strukturierte Abfragen zu führen, um personalisierte Energiespartipps zu geben
+3. Konkrete und umsetzbare Empfehlungen für Energieeffizienz in der Wohnung durch Produkte und Maßnahmen zu geben
+4. Verständliche und prägnante Erklärungen zu liefern, ohne zu technisch zu werden
+5. Potenzielle Kosteneinsparungen durch empfohlene Maßnahmen zu berechnen und dem Nutzer zu präsentieren
 
-Wenn der Benutzer ein Bild oder eine Audiodatei sendet, analysiere deren Inhalt im Kontext von Energieeinsparungsmöglichkeiten.
-Zum Beispiel, wenn ein Bild eines Raumes gesendet wird, identifiziere potenzielle Energieverschwendung wie ineffiziente Beleuchtung, 
-schlecht isolierte Fenster oder energiehungrige Geräte.
-
-Organisiere deine Antworten klar und übersichtlich. Wenn du konkrete Empfehlungen gibst, 
-erkläre die potenziellen Einsparungen und die geschätzten Kosten für die Umsetzung.
+Stelle dem Benutzer Fragen zu seiner Wohnsituation, seinen Geräten und seinem Verhalten, um möglichst detaillierte Informationen für personalisierte Empfehlungen zu erhalten.
+Konzentriere dich auf Maßnahmen wie energieeffiziente Beleuchtung, wassersparende Duschköpfe, smarte Thermostate, Abdichtungen und optimierte Stromverträge.
+Vermeide zu technische Erklärungen und fokussiere dich stattdessen auf die Vorteile und die Umsetzbarkeit der Empfehlungen.
 """
 
 class ConversationManager:
@@ -99,7 +97,7 @@ class ConversationManager:
         except Exception as e:
             logger.error(f"Fehler beim Speichern der Konversation: {e}")
 
-    def get_conversation_history(self, user_id: int, limit: int = 5) -> list:
+    def get_conversation_history(self, user_id: int, limit: int = 20) -> list:
         """Lädt die letzten N Nachrichten aus der Konversationshistorie"""
         file_path = os.path.join(self.conversation_dir, f"{user_id}.json")
         try:
@@ -181,7 +179,7 @@ class EnergyAssistant:
         """Verarbeitet eine Nachricht und generiert eine Antwort"""
         try:
             # Lade Konversationsverlauf
-            conversation_history = self.conversation_manager.get_conversation_history(user_id)
+            conversation_history = self.conversation_manager.get_conversation_history(user_id, limit=20)
             
             # Erstelle die Nachrichtenliste für die API
             messages = [{"role": "system", "content": SYSTEM_PROMPT}]
@@ -208,7 +206,17 @@ class EnergyAssistant:
                         max_tokens=800
                     )
                 )
-                return completion.choices[0].message.content
+                
+                response = completion.choices[0].message.content
+                
+                # Füge Kostenberechnungen hinzu, wenn relevant
+                if "kosten" in message.lower() or "einsparung" in message.lower() or "sparen" in message.lower():
+                    # Hier Code für die Integration von Kostenberechnungen basierend auf externen Daten
+                    # Beispiel: response += "\n\nDurch die empfohlenen Maßnahmen könntest du bis zu 100€ pro Jahr einsparen."
+                    pass
+                
+                return response
+            
             except Exception as api_error:
                 logger.error(f"API-Fehler: {str(api_error)}")
                 raise
