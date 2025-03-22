@@ -1,0 +1,52 @@
+# Virtuelle Umgebungen
+venv/
+env/
+ENV/
+
+# Umgebungsvariablen und sensible Daten
+.env
+
+# Python-Cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Konversationsdaten
+data/
+conversations/
+
+# Temporäre Dateien
+temp_*.jpg
+temp_*.ogg
+temp_*.mp3
+temp_*.wav
+
+# Logs
+*.log
+
+# IDE-Dateien
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Betriebssystemdateien
+.DS_Store
+Thumbs.db 
