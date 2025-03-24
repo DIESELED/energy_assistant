@@ -5,6 +5,8 @@ ENV/
 
 # Umgebungsvariablen und sensible Daten
 .env
+*.pem
+energy_assistant_key.pem
 
 # Python-Cache
 __pycache__/
