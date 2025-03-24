@@ -1,14 +1,4 @@
-# Virtuelle Umgebungen
-venv/
-env/
-ENV/
-
-# Umgebungsvariablen und sensible Daten
-.env
-*.pem
-energy_assistant_key.pem
-
-# Python-Cache
+# Python
 __pycache__/
 *.py[cod]
 *$py.class
@@ -30,25 +20,25 @@ wheels/
 .installed.cfg
 *.egg
 
-# Konversationsdaten
-data/
-conversations/
+# Virtual Environment
+venv/
+ENV/
+env/
 
-# Temporäre Dateien
-temp_*.jpg
-temp_*.ogg
-temp_*.mp3
-temp_*.wav
-
-# Logs
-*.log
-
-# IDE-Dateien
+# IDE
 .idea/
 .vscode/
 *.swp
 *.swo
 
-# Betriebssystemdateien
+# Logs
+*.log
+
+# Sensitive Data
+.env
+*.pem
+*.key
+
+# OS
 .DS_Store
 Thumbs.db 
