@@ -2,9 +2,11 @@ from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
 from config import TELEGRAM_BOT_TOKEN, OPENAI_API_KEY
 from privacy_policy import get_privacy_policy
+from terms_of_service import get_terms_of_service
 from openai import OpenAI
 import logging
 import sys
+import json
 
 # Logging konfigurieren
 logging.basicConfig(
@@ -29,6 +31,7 @@ Ich bin dein persönlicher Energiespar-Assistent. Ich helfe dir dabei, Energie u
 /start - Startet den Bot
 /help - Zeigt die Hilfe-Nachricht
 /privacy - Zeigt die Datenschutzerklärung
+/terms - Zeigt die Nutzungsbedingungen
 
 💡 Du kannst mir einfach Fragen zum Thema Energiesparen stellen, zum Beispiel:
 - Wie kann ich beim Heizen Energie sparen?
@@ -43,6 +46,12 @@ async def privacy_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
     await update.message.reply_text(get_privacy_policy())
 
+async def terms_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """
+    Sendet die Nutzungsbedingungen an den Benutzer.
+    """
+    await update.message.reply_text(get_terms_of_service())
+
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
     Sendet eine Hilfe-Nachricht an den Benutzer.
@@ -54,6 +63,7 @@ Verfügbare Befehle:
 /start - Startet den Bot
 /help - Zeigt diese Hilfe-Nachricht
 /privacy - Zeigt die Datenschutzerklärung
+/terms - Zeigt die Nutzungsbedingungen
 
 Ich bin dein persönlicher Energiespar-Assistent. Du kannst mich alles zum Thema Energie sparen fragen, und ich werde dir passende Tipps geben.
 """
@@ -69,18 +79,31 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
         logger.debug("Versuche OpenAI API aufzurufen...")
         # OpenAI API aufrufen
+        model_name = "gpt-3.5-turbo-0125"  # Verwende das GPT-3.5 Turbo Modell
+        logger.debug(f"Verwende Modell: {model_name}")
+        
+        messages = [
+            {"role": "system", "content": """Du bist ein Energiespar-Experte. Beantworte Fragen zum Thema Energiesparen 
+            präzise und praktisch. Gib konkrete, umsetzbare Tipps. Verwende eine freundliche, verständliche Sprache 
+            und formatiere deine Antworten mit Emojis für bessere Lesbarkeit. Antworte immer auf Deutsch."""},
+            {"role": "user", "content": message_text}
+        ]
+        
+        logger.debug(f"API Request mit folgenden Parametern:")
+        logger.debug(f"- Modell: {model_name}")
+        logger.debug(f"- Messages: {json.dumps(messages, ensure_ascii=False, indent=2)}")
+        
         response = client.chat.completions.create(
-            model="gpt-4",
-            messages=[
-                {"role": "system", "content": """Du bist ein Energiespar-Experte. Beantworte Fragen zum Thema Energiesparen 
-                präzise und praktisch. Gib konkrete, umsetzbare Tipps. Verwende eine freundliche, verständliche Sprache 
-                und formatiere deine Antworten mit Emojis für bessere Lesbarkeit. Antworte immer auf Deutsch."""},
-                {"role": "user", "content": message_text}
-            ],
-            max_tokens=500,
+            model=model_name,
+            messages=messages,
+            max_tokens=500,  # Wie in der funktionierenden Version
             temperature=0.7
         )
-        logger.debug("OpenAI API Antwort erhalten")
+        
+        logger.debug(f"OpenAI API Antwort erhalten:")
+        logger.debug(f"- Verwendetes Modell: {response.model}")
+        logger.debug(f"- Response ID: {response.id}")
+        logger.debug(f"- Created: {response.created}")
         
         # Antwort extrahieren und senden
         bot_response = response.choices[0].message.content
@@ -106,6 +129,7 @@ def main():
         application.add_handler(CommandHandler("start", start_command))
         application.add_handler(CommandHandler("help", help_command))
         application.add_handler(CommandHandler("privacy", privacy_command))
+        application.add_handler(CommandHandler("terms", terms_command))
         application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
 
         # Starte den Bot

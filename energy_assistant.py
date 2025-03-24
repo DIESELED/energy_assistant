@@ -200,7 +200,7 @@ class EnergyAssistant:
                 completion = await asyncio.get_event_loop().run_in_executor(
                     None,
                     lambda: self.client.chat.completions.create(
-                        model="gpt-3.5-turbo",
+                        model="gpt-4o-2024-08-06",
                         messages=messages,
                         temperature=0.7,
                         max_tokens=800
